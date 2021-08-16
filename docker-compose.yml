@@ -1,0 +1,75 @@
+version: '2'
+services:
+  mysql:
+    restart: always
+    build: ./data/mysql/
+    volumes:
+      - "./data/mysql/db:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: samplecake_db_user
+      MYSQL_PASSWORD: password1234
+      MYSQL_DATABASE: samplecake_db
+      TZ: "Asia/Tokyo"
+    ports:
+      - "3307:3306"
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=password
+    # コンテナと他のサービスを繋げる。
+    links:
+      - mysql
+    # ポートマッピング(ホスト:コンテナ)
+    ports:
+       - "8080:80"
+    # ?????
+    volumes:
+       - ./data/phpmyadmin/sessions:/sessions
+
+  nginx:
+    restart: always
+    image: "nginx:mainline-alpine"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./data/nginx/conf:/etc/nginx/"
+      - "./data/htdocs:/var/www/html"
+    environment:
+      TZ: "Asia/Tokyo"
+    depends_on:
+      - phpfpm
+    links:
+      - phpfpm
+
+  phpfpm:
+    build: ./data/phpfpm/
+    environment:
+      TZ: "Asia/Tokyo"
+    volumes:
+      - "./data/htdocs:/var/www/html"
+    depends_on:
+      - mysql
+    links:
+      - mysql
+
+  host:
+    build: ./data/htdocs
+    environment:
+      TZ: "Asia/Tokyo"
+      PRJ: "samplecake"
+    volumes:
+      - "./data/htdocs:/root"
+    ports:
+      - "8765:80"
+    depends_on:
+      - mysql
+      - phpfpm
+    links:
+      - mysql
+      - phpfpm
