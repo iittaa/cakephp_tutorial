@@ -9,8 +9,11 @@ class PersonsController extends AppController
 
     public function initialize()
     {
-        Parent::initialize();
+        parent::initialize();
         $this->loadComponent("Paginator");
+        $this->viewBuilder()->setLayout("sample");
+        $this->set('header', '*peronss*');
+        $this->set('footer', 'copyright 2015 libro.');
     }
 
     public $paginate = [

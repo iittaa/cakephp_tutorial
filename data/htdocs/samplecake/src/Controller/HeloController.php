@@ -5,6 +5,15 @@ use App\Controller\AppController;
 
 class HeloController extends AppController
 {
+
+    public function initialize()
+    {
+        parent::initialize();
+        $this->viewBuilder()->setLayout("sample");
+        $this->set('header', '* this is sample site *');
+        $this->set('footer', 'copyright 2015 libro.');
+    }
+
     public function index()
     {
         // $this->set("message", $this->request->getData("text1"));
